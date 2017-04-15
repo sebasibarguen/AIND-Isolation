@@ -113,8 +113,8 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=10.):
+    def __init__(self, search_depth=3, score_fn=improved_score,
+                 iterative=True, method='alphabeta', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -165,11 +165,12 @@ class CustomPlayer:
         algorithm = self.minimax if self.method == 'minimax' else self.alphabeta
 
         try:
-
             # If iterative on, start iterative deepening
             if self.iterative:
-                for depth in range(1, game.width * game.height):
+                for depth in range(1, len(game.get_blank_spaces()) + 1):
                     score, move = algorithm(game, depth=depth, maximizing_player=True)
+                    # print('Going depth: ', depth, 'Returned:', move)
+
             else:
                 score, move = algorithm(game, depth=self.search_depth, maximizing_player=True)
 
@@ -178,6 +179,7 @@ class CustomPlayer:
             return move
 
         # Return the best move from the last completed search iteration
+        # print('Returning:', move)
         return move
 
     def minimax(self, game, depth, maximizing_player=True):
@@ -213,6 +215,9 @@ class CustomPlayer:
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
+
+        if game.utility(game.active_player) != 0:
+            return game.utility(self), game.get_player_location(self)
 
         # choose max or min depending on player
         ops = max if maximizing_player else min
@@ -268,11 +273,11 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
+        if game.utility(game.active_player) != 0:
+            return game.utility(self), game.get_player_location(self)
+
         # choose max or min depending on player
         ops = max if maximizing_player else min
-
-        best_move = (-1, -1)
-        best_score = float("-inf")
 
         scores_moves = []
         for move in game.get_legal_moves():
@@ -293,4 +298,4 @@ class CustomPlayer:
                 beta = min(score, beta)
             scores_moves.append((score, move))
 
-        return ops(scores_moves)
+        return ops(scores_moves) if scores_moves else (float("-inf"), (-1, -1))
