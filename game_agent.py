@@ -109,6 +109,37 @@ def diff_moves_score(game, player):
     heuristic = float(own_moves - opp_moves)
     return heuristic
 
+def percentage_diff_moves_score(game, player):
+    """The "Improved" evaluation function discussed in lecture that outputs a
+    score equal to the difference in the number of moves available to the
+    two players.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    heuristic = float(own_moves - opp_moves) / len(game.get_blank_spaces())
+    return heuristic
 
 def custom_score(game, player):
     """The "Improved" evaluation function discussed in lecture that outputs a
@@ -138,7 +169,7 @@ def custom_score(game, player):
         return float("inf")
 
     percentage_played = 1. - float(len(game.get_blank_spaces()) / (game.width * game.height))
-    heuristic_function = diff_moves_score if percentage_played > 1. else open_moves_near_score
+    heuristic_function = diff_moves_score if percentage_played > 7. else open_moves_near_score
 
     return heuristic_function(game, player)
 
@@ -174,7 +205,7 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=custom_score,
+    def __init__(self, search_depth=3, score_fn=open_move_score,
                  iterative=True, method='alphabeta', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
