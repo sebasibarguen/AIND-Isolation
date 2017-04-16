@@ -109,7 +109,7 @@ def diff_moves_score(game, player):
     heuristic = float(own_moves - opp_moves)
     return heuristic
 
-def diff_2_moves_score(game, player):
+def custom_score(game, player):
     """The "Improved" evaluation function discussed in lecture that outputs a
     score equal to the difference in the number of moves available to the
     two players.
@@ -173,7 +173,7 @@ def percentage_diff_moves_score(game, player):
     heuristic = float(own_moves - opp_moves) / len(game.get_blank_spaces())
     return heuristic
 
-def custom_score(game, player):
+def combination_score(game, player):
     """The "Improved" evaluation function discussed in lecture that outputs a
     score equal to the difference in the number of moves available to the
     two players.
