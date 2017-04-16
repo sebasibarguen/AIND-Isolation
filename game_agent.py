@@ -138,7 +138,7 @@ def diff_2_moves_score(game, player):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    heuristic = float(own_moves - opp_moves*2)
+    heuristic = float(own_moves - opp_moves*5)
     return heuristic
 
 def percentage_diff_moves_score(game, player):
