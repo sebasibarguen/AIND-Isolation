@@ -13,7 +13,7 @@ class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
 
-def custom_score(game, player):
+def open_moves_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -45,7 +45,39 @@ def custom_score(game, player):
     heuristic = float(len(game.get_legal_moves(player)))
     return heuristic
 
-def improved_score(game, player):
+
+def sub(t1, t2):
+    return (t1[0]-t2[0], t1[1]-t2[1])
+
+def open_moves_near_score(game, player):
+    """
+    Calculates the open spaces near a player, 1 square near.
+    """
+
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    opponent = game.get_opponent(player)
+
+    player_moves = []
+    opponent_moves = []
+    for blank in game.get_blank_spaces():
+
+        player_delta = sub(game.get_player_location(player), blank)
+        if player_delta[0] == 1 or player_delta[1] == 1:
+            player_moves.append(blank)
+
+        opponent_delta = sub(game.get_player_location(opponent), blank)
+        if opponent_delta[0] == 1 or opponent_delta[1] == 1:
+            opponent_moves.append(blank)
+
+    return float(len(player_moves) - len(opponent_moves))
+
+
+def diff_moves_score(game, player):
     """The "Improved" evaluation function discussed in lecture that outputs a
     score equal to the difference in the number of moves available to the
     two players.
@@ -77,10 +109,39 @@ def improved_score(game, player):
     heuristic = float(own_moves - opp_moves)
     return heuristic
 
-opening_book = {
-    'first_player': [(0, 0)],
-    'second_player': [(0, 1), (1, 0)]
-}
+
+def custom_score(game, player):
+    """The "Improved" evaluation function discussed in lecture that outputs a
+    score equal to the difference in the number of moves available to the
+    two players.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    percentage_played = 1. - float(len(game.get_blank_spaces()) / (game.width * game.height))
+    heuristic_function = diff_moves_score if percentage_played > 1. else open_moves_near_score
+
+    return heuristic_function(game, player)
+
 
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
@@ -113,7 +174,7 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=improved_score,
+    def __init__(self, search_depth=3, score_fn=custom_score,
                  iterative=True, method='alphabeta', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
