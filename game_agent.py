@@ -205,7 +205,7 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=open_move_score,
+    def __init__(self, search_depth=3, score_fn=custom_score,
                  iterative=True, method='alphabeta', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
